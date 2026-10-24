@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多文件上传</title>
+    <style>
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    }
+
+.drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            }
+
+.drop-zone:hover,.drop-zone.dragover {
+            border-color: #4a90d9;
+            background: #f0f7ff;
+            }
+
+.drop-zone p { color: #888; font-size: 14px; }
+
+.drop-zone strong { color: #4a90d9; }
+
+.file-list { margin-bottom: 20px; }
+
+.file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            }
+
+.file-item.name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #333;
+            }
+
+.file-item.size { color: #999; margin-left: 12px; font-size: 13px; }
+
+.file-item.remove {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+            line-height: 1;
+            }
+
+.file-item.remove:hover { color: #c0392b; }
+
+.upload-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 32px;
+            width: 90%;
+            max-width: 520px;
+            }
+
+.content { color: #888; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: blue; color:blue; }
+
+.content2 { color: #888; font-size: 12px; }
+
+.content1 { color: #888; font-size: 15px; }
+
+        h2 { text-align: center; color: #1a1a2e; margin-bottom: 8px; font-size: 22px; }
+
+.subtitle { text-align: center; color: #666; font-size: 14px; margin-bottom: 24px; }
+
+.upload-area { border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 8px; }
+
+.upload-area.dragover { background: #f0f8ff; border-color: #007bff; }
+
+        fileList { text-align: center; margin: 15px 0; font-size: 14px; color: #555; }
+
+        button {
+                width: 100%;
+                padding: 12px;
+                background: #4a90d9;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background 0.3s;
+                }
+
+        button:disabled {
+                        background: #a0c4e8;
+                        cursor: not-allowed;
+                        }
+
+.text {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        background: #f5f7fa;
+        color: #999;
+        outline: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-align: center;
+        }
+
+.flush-files {
+        color: #888;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 4px;
+        font-size: 13px;
+        text-align: center；
+        }
+
+.list_tem {
+       border: 2px solid #e0e0e0;
+       border-radius: 8px;
+       font-size: 13px;
+       text-align: left；
+       }
+
+.list_files_area {
+       border: 2px solid #e0e0e0;
+       border-radius: 8px;
+       padding: 0px;
+       font-size: 13px;
+       text-align: center；
+       color: #999;
+        }
+
+.download-file {
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        text-decoration-color: blue;
+        color:blue;
+        cursor: pointer;
+        text-align: left；
+        }
+
+.select_file {
+        font-size: 13px;
+        text-align: center；
+        color: #888
+        }
+
+#result { margin-top: 20px; white-space: pre-wrap; background: #f9f9f9; padding: 15px; border-radius: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="upload-card">
+        <h2>📤 文件上传</h2>
+        <p class="subtitle">支持单选 / 多选 / 拖拽</p>
+        <div>
+            <span class="content1">请输入session_id:</span>
+            <input class="text" style="text" id="thread-id" placeholder="ID Number">
+            <br><br>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            <span class="content">点击选择文件</span>
+            <span class="content2">或 拖拽文件</span>
+            <input type="file" id="fileInput" name="files" multiple style="display: none;">
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+
+        <button id="uploadBtn" disabled>上传文件</button>
+
+        <div id="result"></div>
+        <div><br></div>
+
+
+        <div>
+            <div class="flush-files" id="flush-files">点击刷新下载列表</div>
+            <div><br></div>
+            <div class="list_files_area" id="list-files"></div>
+        </div>
+        <div><br></div>
+        <div class="select_file" id="select_file"></div>
+        <div><br></div>
+        <button id="downloadBtn" disabled>下载文件</button>
+
+    </div>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileListDiv = document.getElementById('fileList');
+        const resultDiv = document.getElementById('result');
+        const dropZone = document.getElementById('dropZone');
+        const ThreadId = document.getElementById('thread-id');
+        const flushFiles = document.getElementById('flush-files');
+        const listFiles = document.getElementById('list-files');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const selectFile = document.getElementById('select_file');
+
+        let selectedFiles = []; // 用数组保存用户选择的文件
+        let ThreadIdValue = '';
+        let showFiles = [];
+        let file_path = '';
+        let file_name = '';
+
+        ThreadId.addEventListener('input',()=>{
+            console.log(ThreadId.value);
+            ThreadIdValue = ThreadId.value;
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // 监听文件选择
+        fileInput.addEventListener('change', function() {
+            selectedFiles = Array.from(this.files);
+            updateFileList();
+        });
+
+
+        // 拖拽上传事件
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const get_files = e.dataTransfer.files;
+            selectedFiles = Array.from(get_files)
+            if (selectedFiles.length === 0) return;
+            updateFileList();
+        });
+
+
+        // 更新已选文件列表
+        function updateFileList() {
+            if (selectedFiles.length === 0) {
+                fileListDiv.textContent = '';
+                uploadBtn.disabled = true;
+            } else {
+                fileListDiv.innerHTML = '';
+                selectedFiles.forEach((file, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'file-item';
+                    div.innerHTML = `
+                        <span class="name">📄${index + 1}.${file.name} </span>
+                        <span class="size">(${(file.size / 1024).toFixed(1)} KB)</span>
+                        <span class="remove" data-index="${index}">×</span>
+                    `;
+                    fileListDiv.appendChild(div);
+                });
+                uploadBtn.disabled = false;
+
+                // 绑定删除事件
+                document.querySelectorAll('.remove').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const idx = parseInt(this.dataset.index);
+                        selectedFiles.splice(idx, 1);
+                        updateFileList();
+                    });
+                });
+
+                // 更新按钮状态
+                uploadBtn.disabled = selectedFiles.length === 0;
+            };
+        };
+
+
+        // 上传按钮点击事件
+        uploadBtn.addEventListener('click', async function() {
+            if (selectedFiles.length === 0) {
+                alert('请先选择文件');
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '上传中...';
+
+            // 关键：创建 FormData，并遍历文件，用同一个 key "files" 逐个 append
+            const formData = new FormData();
+            for (const file of selectedFiles) {
+                formData.append('thread_id',ThreadIdValue);
+                formData.append('files', file);  // key 必须与后端参数名一致
+            }
+
+            try {
+                // 注意：不要手动设置 Content-Type，浏览器会自动带上 boundary
+                const response = await fetch('http://127.0.0.1:8080/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.textContent = '✅ 上传成功\n' + JSON.stringify(data, null, 2);
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.textContent = '❌ 上传失败（HTTP ' + response.status + '）\n' + errorText;
+                }
+            } catch (error) {
+                resultDiv.textContent = '❌ 请求出错：' + error.message;
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '上传文件';
+            }
+        });
+
+
+        //刷新文件列表
+        flushFiles.addEventListener('click', async function() {
+            file_path = '';
+            const response_list = await fetch('http://127.0.0.1:8080/api/files?path=/Users/vincent/Source_code/D_Agent/save_dir/output/session_ming',{
+                method:'GET',
+                headers: {'Accept': 'application/json'}
+            });
+
+            if (response_list.ok) {
+                const data_list = await response_list.json();
+                showFiles = Array.from(data_list.files);
+                console.log(showFiles);
+            };
+
+            if (showFiles.length === 0) {
+                listFiles.textContent = '无可下载文档';
+            } else {
+                listFiles.innerHTML = '';
+                showFiles.forEach((file,index) =>{
+                    const div = document.createElement('div');
+                    div.className = 'list-tem';
+                    div.innerHTML = `
+                        <span class='download-file' id='download-file' data-index='${index}'>📁${file.name} (${(file.size / 1024).toFixed(1)} MB)</span>
+                        <div><br></div>
+                    `;
+                    listFiles.appendChild(div);
+                });
+            };
+        });
+
+
+        listFiles.addEventListener('mouseenter' , ()=>{
+            document.querySelectorAll('.download-file').forEach(btn => {
+                    btn.addEventListener('click' ,function(e) {
+                        const index = parseInt(e.target.dataset.index);
+                        file_name = showFiles[index].name;
+                        file_path = showFiles[index].path;
+                        downloadBtn.disabled = file_path.trim().length === 0
+                        selectFile.textContent = `选中的文档:  ${file_name}`;
+                    });
+            });
+        });
+
+
+        //触发下载按钮
+        downloadBtn.addEventListener('click',async function() {
+            console.log('123');
+            const file_response = await fetch(`http://127.0.0.1:8080/api/download?path=${file_path}`,{method:'GET'});
+            const blob = await file_response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file_name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            downloadBtn.disabled = true;
+            selectFile.textContent = '';
+        });
+    </script>
+</body>
+</html>

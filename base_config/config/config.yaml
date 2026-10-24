@@ -1,0 +1,25 @@
+mysql:
+  user: root
+  password: infini_rag_flow
+  host: localhost
+  port: 3306
+  charset: utf8mb4
+  collection: utf8mb4-unicode-ci
+  sql_mode: traditional
+  database: deepsearch_db
+  table1: drugs
+  table2: inventory
+  table3: sales_records
+
+ragflow:
+  api_key: ragflow-******
+  url: "http://localhost:9380"
+
+tavily:
+  api_key: tvly-****
+
+llm:
+  url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  api_key: sk-*******
+  model: kimi-k3
+  model_provider: openai
